@@ -184,11 +184,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 for (let i = 0; i < existingResults.length; i++) {
                     // Извлекаем текст из существующего элемента (без номера)
-                    const existingText = existingResults[i].textContent.trim().substring(existingResults[i].textContent.indexOf(' ') + 1);
-                    
-                    if (existingText === code.data) {
-                        alreadyExists = true;
-                        break;
+                    // Используем регулярное выражение для извлечения текста после номера
+                    const match = existingResults[i].textContent.trim().match(/^\d+\.\s*(.*)/);
+                    if (match) {
+                        const existingText = match[1];
+                        if (existingText === code.data) {
+                            alreadyExists = true;
+                            break;
+                        }
                     }
                 }
                 
