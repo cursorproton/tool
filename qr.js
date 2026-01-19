@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         video.style.display = 'none';
-        scanButton.textContent = 'Сканировать QR';
+        scanButton.textContent = 'Сканировать';
     }
 
     function scan() {
