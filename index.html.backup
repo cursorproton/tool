@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИТСтартап - Инновационные Решения</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <link rel="icon" href="./icons/icon-192x192.png" sizes="192x192" type="image/png">
+    <!-- Content Security Policy with Service Worker support -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; worker-src 'self';">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">ИТ-Стартап22</div>
+            <ul class="nav-links">
+                <li><a href="#home">Главная</a></li>
+                <li><a href="#about">О нас</a></li>
+                <li><a href="#services">Услуги</a></li>
+                <li><a href="#contact">Контакты</a></li>
+                <li><a href="qr.html">QR Сканер</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Инновационные ИТ-решения для вашего бизнеса</h1>
+            <p>Мы создаем передовые технологии, которые помогают бизнесу расти и развиваться в цифровую эпоху.</p>
+            <button class="cta-button">Начать сотрудничество</button>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <h2>О нас</h2>
+        <p>Наша компания специализируется на разработке инновационных ИТ-решений для бизнеса. Мы объединяем передовые технологии с глубоким пониманием потребностей клиентов.</p>
+    </section>
+
+    <section id="services" class="services">
+        <h2>Наши услуги</h2>
+        <div class="service-grid">
+            <div class="service-card">
+                <h3>Разработка ПО</h3>
+                <p>Создаем современные веб- и мобильные приложения под ваши бизнес-задачи.</p>
+            </div>
+            <div class="service-card">
+                <h3>Искусственный интеллект</h3>
+                <p>Внедряем ИИ-решения для автоматизации бизнес-процессов.</p>
+            </div>
+            <div class="service-card">
+                <h3>Кибербезопасность</h3>
+                <p>Обеспечиваем защиту данных и инфраструктуры вашего бизнеса.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact">
+        <h2>Свяжитесь с нами</h2>
+        <p>Готовы начать проект? Свяжитесь с нами для консультации.</p>
+        <button class="contact-button">Отправить сообщение</button>
+    </section>
+
+    <footer>
+        <p>© 2023 ИТ-Стартап. Все права защищены.</p>
+        <p id="offline-indicator" style="display: none; background-color: #fff3cd; color: #856404; padding: 10px; margin-top: 10px; border-radius: 5px;">Работа в автономном режиме</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="pwa-support.js"></script>
+</body>
+</html>

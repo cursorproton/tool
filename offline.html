@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Нет подключения к интернету</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <link rel="icon" href="icons/icon-192x192.png" sizes="192x192" type="image/png">
+    <!-- Strict Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <style>
+        .offline-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .offline-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .offline-title {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .offline-message {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            color: #7f8c8d;
+        }
+        
+        .retry-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+        
+        .retry-button:hover {
+            background-color: #2980b9;
+        }
+        
+        .note {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">📶</div>
+        <h1 class="offline-title">Нет подключения к интернету</h1>
+        <p class="offline-message">Приложение работает в автономном режиме. Некоторые функции могут быть недоступны.</p>
+        <p class="offline-message">Вы можете продолжить использовать приложение, когда появится подключение к интернету.</p>
+        <div>
+            <button class="retry-button" onclick="retryConnection()">Попробовать снова</button>
+            <button class="retry-button" onclick="goToMainApp()" style="background-color: #28a745;">Перейти к приложению</button>
+            <button class="retry-button" onclick="goToQRScanner()" style="background-color: #6f42c1;">QR Сканер</button>
+        </div>
+        
+        <div class="note">
+            <strong>Примечание:</strong> Для полноценной работы в автономном режиме приложение должно быть запущено хотя бы один раз с подключением к интернету для кэширования всех необходимых файлов.
+        </div>
+    </div>
+    
+    <script>
+        function retryConnection() {
+            window.location.reload();
+        }
+        
+        function goToMainApp() {
+            // Переход к основному приложению
+            window.location.href = './index.html';
+        }
+        
+        function goToQRScanner() {
+            // Переход к QR сканеру
+            window.location.href = './qr.html';
+        }
+        
+        // Проверяем, есть ли подключение к интернету
+        window.addEventListener('online', () => {
+            // Проверяем, можно ли загрузить главную страницу
+            fetch('./index.html')
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = './index.html';
+                    } else {
+                        // Если главная страница недоступна, пробуем перезагрузить
+                        window.location.reload();
+                    }
+                })
+                .catch(() => {
+                    // Если ошибка, просто перезагружаем страницу
+                    window.location.reload();
+                });
+        });
+        
+        // При загрузке страницы проверяем, можем ли мы перейти к основному приложению
+        window.addEventListener('DOMContentLoaded', () => {
+            // Проверяем, есть ли Service Worker
+            if ('serviceWorker' in navigator) {
+                // Service Worker должен обеспечить работу в автономном режиме
+                console.log('Service Worker доступен для обеспечения автономной работы');
+            }
+        });
+    </script>
+</body>
+</html>
