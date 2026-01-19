@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Оффлайн Todo PWA1</title>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#2196F3">
+  <style>
+    body { font-family: Arial; max-width: 400px; margin: 0 auto; padding: 20px; }
+    input { width: 70%; padding: 10px; } button { padding: 10px 20px; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 10px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; }
+  </style>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="jquery.min.js"></script>
+  <script src="script.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Сканер QR-кодов</h1>
+    <div id="connection-status" style="margin-bottom: 15px; padding: 10px; border-radius: 5px; display: none;"></div>
+    <div id="file-protocol-warning" style="margin-bottom: 15px; padding: 10px; border-radius: 5px; display: none; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;">
+        <strong>Внимание!</strong> Вы открыли файл напрямую через протокол <code>file://</code>.
+        <br>Для корректной работы PWA (в том числе в автономном режиме) откройте приложение через локальный веб-сервер.
+        <br>Подробнее читайте в файле <a href="README.md">README.md</a>.
+    </div>
+    <div id="offline-file-warning" style="margin-bottom: 15px; padding: 10px; border-radius: 5px; display: none; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;">
+        <strong>Ошибка загрузки!</strong> Приложение не может загрузиться в оффлайне, потому что оно не было предварительно установлено и кэшировано.
+        <br>Для работы в оффлайне приложение должно быть запущено хотя бы один раз с подключением к интернету через веб-сервер.
+    </div>
+    <div id="offline-ready-message" style="margin-bottom: 15px; padding: 10px; border-radius: 5px; display: none; background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724;">
+        <strong>Приложение готово к работе в оффлайне!</strong> Все необходимые ресурсы были кэшированы и приложение может работать без подключения к интернету.
+    </div>
+    <button id="scanButton">Сканировать QR</button>
+    <div id="result"></div>
+    <video id="video" width="300" height="200" style="display: none;"></video>
+    <canvas id="canvas" width="300" height="200" style="display: none;"></canvas>
+    <div style="margin-top: 20px;">
+        <a href="index.html" class="cta-button">Назад на главную</a>
+    </div>
+</div>
+<script src="./jsQR.js"></script>
+<script src="./qr.js"></script>
+</body>
+</html>
