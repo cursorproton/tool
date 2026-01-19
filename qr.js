@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let scanning = false;
     let stream = null;
+    let qrCount = 0; // Переменная для отслеживания количества найденных QR-кодов
 
     // Проверяем поддержку getUserMedia
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -177,6 +178,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (code) {
                 // QR-код найден
+                // Увеличиваем счетчик найденных QR-кодов
+                qrCount++;
+                
                 // Создаем элемент для нового QR-кода и добавляем его к существующим результатам
                 const newResultElement = document.createElement('div');
                 newResultElement.style.padding = '15px';
@@ -186,11 +190,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 newResultElement.style.color = '#155724';
                 newResultElement.style.marginBottom = '10px';
                 newResultElement.innerHTML = `
-                    ${code.data}
+                    ${qrCount}. ${code.data}
                 `;
                 
-                // Добавляем новый результат к уже существующим
-                resultDiv.appendChild(newResultElement);
+                // Добавляем новый результат в начало (сверху) уже существующих
+                if(resultDiv.firstChild) {
+                    resultDiv.insertBefore(newResultElement, resultDiv.firstChild);
+                } else {
+                    resultDiv.appendChild(newResultElement);
+                }
                 
                 // Продолжаем сканирование, не останавливая его
                 // Добавляем небольшую задержку, чтобы избежать множественных чтений одного и того же QR-кода
