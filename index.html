@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Оффлайн Todo PWA1</title>
+  <title>Инструмент</title>
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#2196F3">
   <style>
@@ -32,13 +32,11 @@
     <div id="offline-ready-message" style="margin-bottom: 15px; padding: 10px; border-radius: 5px; display: none; background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724;">
         <strong>Приложение готово к работе в оффлайне!</strong> Все необходимые ресурсы были кэшированы и приложение может работать без подключения к интернету.
     </div>
-    <button id="scanButton">Сканировать QR</button>
-    <div id="result"></div>
+    <button id="scanButton">Сканировать</button>
     <video id="video" width="300" height="200" style="display: none;"></video>
     <canvas id="canvas" width="300" height="200" style="display: none;"></canvas>
-    <div style="margin-top: 20px;">
-        <a href="index.html" class="cta-button">Назад на главную</a>
-    </div>
+    <div id="result_user_Label">Кому: </div><div id="result_user"></div>
+    <div id="result_Label">Инструмент: </div><div id="result"></div>
 </div>
 <script src="./jsQR.js"></script>
 <script src="./qr.js"></script>
