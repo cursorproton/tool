@@ -178,26 +178,43 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (code) {
                 // QR-код найден
-                // Увеличиваем счетчик найденных QR-кодов
-                qrCount++;
+                // Проверяем, содержится ли уже такой текст в результате
+                const existingResults = resultDiv.querySelectorAll('div');
+                let alreadyExists = false;
                 
-                // Создаем элемент для нового QR-кода и добавляем его к существующим результатам
-                const newResultElement = document.createElement('div');
-                newResultElement.style.padding = '15px';
-                newResultElement.style.backgroundColor = '#d4edda';
-                newResultElement.style.border = '1px solid #c3e6cb';
-                newResultElement.style.borderRadius = '5px';
-                newResultElement.style.color = '#155724';
-                newResultElement.style.marginBottom = '10px';
-                newResultElement.innerHTML = `
-                    ${qrCount}. ${code.data}
-                `;
+                for (let i = 0; i < existingResults.length; i++) {
+                    // Извлекаем текст из существующего элемента (без номера)
+                    const existingText = existingResults[i].textContent.trim().substring(existingResults[i].textContent.indexOf(' ') + 1);
+                    
+                    if (existingText === code.data) {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
                 
-                // Добавляем новый результат в начало (сверху) уже существующих
-                if(resultDiv.firstChild) {
-                    resultDiv.insertBefore(newResultElement, resultDiv.firstChild);
-                } else {
-                    resultDiv.appendChild(newResultElement);
+                // Если текст не существует, добавляем его
+                if (!alreadyExists) {
+                    // Увеличиваем счетчик найденных QR-кодов
+                    qrCount++;
+                    
+                    // Создаем элемент для нового QR-кода и добавляем его к существующим результатам
+                    const newResultElement = document.createElement('div');
+                    newResultElement.style.padding = '15px';
+                    newResultElement.style.backgroundColor = '#d4edda';
+                    newResultElement.style.border = '1px solid #c3e6cb';
+                    newResultElement.style.borderRadius = '5px';
+                    newResultElement.style.color = '#155724';
+                    newResultElement.style.marginBottom = '10px';
+                    newResultElement.innerHTML = `
+                        ${qrCount}. ${code.data}
+                    `;
+                    
+                    // Добавляем новый результат в начало (сверху) уже существующих
+                    if(resultDiv.firstChild) {
+                        resultDiv.insertBefore(newResultElement, resultDiv.firstChild);
+                    } else {
+                        resultDiv.appendChild(newResultElement);
+                    }
                 }
                 
                 // Продолжаем сканирование, не останавливая его
