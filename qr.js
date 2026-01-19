@@ -112,8 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function startScanning() {
-        // Скрываем результат и показываем видео
-        resultDiv.textContent = '';
+        // Не очищаем результаты при начале сканирования, чтобы сохранить предыдущие результаты
         video.style.display = 'block';
         scanButton.textContent = 'Остановить сканирование';
         
@@ -178,15 +177,27 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (code) {
                 // QR-код найден
-                resultDiv.innerHTML = `
-                    <div style="padding: 15px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; color: #155724;">
-                        <strong>Найден QR-код:</strong><br>
-                        ${code.data}
-                    </div>
+                // Создаем элемент для нового QR-кода и добавляем его к существующим результатам
+                const newResultElement = document.createElement('div');
+                newResultElement.style.padding = '15px';
+                newResultElement.style.backgroundColor = '#d4edda';
+                newResultElement.style.border = '1px solid #c3e6cb';
+                newResultElement.style.borderRadius = '5px';
+                newResultElement.style.color = '#155724';
+                newResultElement.style.marginBottom = '10px';
+                newResultElement.innerHTML = `
+                    <strong>Найден QR-код:</strong><br>
+                    ${code.data}
                 `;
                 
-                // Останавливаем сканирование после нахождения QR-кода
-                stopScanning();
+                // Добавляем новый результат к уже существующим
+                resultDiv.appendChild(newResultElement);
+                
+                // Продолжаем сканирование, не останавливая его
+                // Добавляем небольшую задержку, чтобы избежать множественных чтений одного и того же QR-кода
+                setTimeout(() => {
+                    requestAnimationFrame(scan);
+                }, 1000);
                 return;
             }
         }
