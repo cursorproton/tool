@@ -186,7 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 newResultElement.style.color = '#155724';
                 newResultElement.style.marginBottom = '10px';
                 newResultElement.innerHTML = `
-                    <strong>Найден QR-код:</strong><br>
                     ${code.data}
                 `;
                 
