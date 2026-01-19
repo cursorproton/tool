@@ -184,10 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 for (let i = 0; i < existingResults.length; i++) {
                     // Извлекаем текст из существующего элемента (без номера)
-                    // Используем регулярное выражение для извлечения текста после номера
-                    const match = existingResults[i].textContent.trim().match(/^\d+\.\s*(.*)/);
-                    if (match) {
-                        const existingText = match[1];
+                    // Разбиваем текст по первому точке и пробелу, чтобы получить текст после номера
+                    const textContent = existingResults[i].textContent.trim();
+                    const dotIndex = textContent.indexOf('.');
+                    if (dotIndex !== -1) {
+                        const existingText = textContent.substring(dotIndex + 2).trim(); // +2 для точки и пробела
                         if (existingText === code.data) {
                             alreadyExists = true;
                             break;
