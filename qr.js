@@ -39,6 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Используем BrowserMultiFormatReader для поддержки всех типов штрихкодов
             const { BrowserMultiFormatReader } = ZXing;
             codeReader = new BrowserMultiFormatReader();
+            
+            // Установим таймаут для декодирования
+            codeReader.timeBetweenScansMillis = 500;
+            
             zxingInitialized = true;
             return true;
         } catch (error) {
@@ -220,13 +224,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             if (err && !(err instanceof ZXing.NotFoundException)) {
-                console.error('Ошибка ZXing:', err);
+                // Убираем вывод ошибок в консоль для более чистой работы
+                // console.error('Ошибка ZXing:', err);
             }
             
             // Продолжаем сканирование если все еще активно
-            if (scanning) {
-                setTimeout(() => scanWithZXing(), 500); // Сканируем каждые 500мс
-            }
+            // Убираем дополнительный таймаут, так как ZXing уже имеет встроенный
         });
     }
 });
