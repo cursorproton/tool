@@ -10,7 +10,7 @@ window.addEventListener('load', function () {
         selectedDeviceId = videoInputDevices[0].deviceId
         
         // Добавляем выпадающий список с камерами если есть более одной камеры
-        if (videoInputDevices.length >= 1) {
+        if (videoInputDevices.length >= 1 && sourceSelect) {
           videoInputDevices.forEach((element) => {
             const sourceOption = document.createElement('option')
             sourceOption.text = element.label
@@ -23,29 +23,34 @@ window.addEventListener('load', function () {
           };
           
           const sourceSelectPanel = document.getElementById('sourceSelectPanel')
-          sourceSelectPanel.style.display = 'block'
+          if (sourceSelectPanel) sourceSelectPanel.style.display = 'block'
         }
         
         // Обработчик кнопки старта сканирования
-        document.getElementById('startButton').addEventListener('click', () => {
+        const startButton = document.getElementById('startButton');
+        if (startButton) startButton.addEventListener('click', () => {
           codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
             if (result) {
               console.log(result)
-              document.getElementById('result').textContent = result.text
+              const resultElement = document.getElementById('result');
+              if (resultElement) resultElement.textContent = result.text
             }
             
             if (err && !(err instanceof ZXing.NotFoundException)) {
               console.error(err)
-              document.getElementById('result').textContent = err
+              const resultElement = document.getElementById('result');
+              if (resultElement) resultElement.textContent = err
             }
           })
           console.log(`Started continuous decode from camera with id ${selectedDeviceId}`)
         })
         
         // Обработчик кнопки сброса
-        document.getElementById('resetButton').addEventListener('click', () => {
+        const resetButton = document.getElementById('resetButton');
+        if (resetButton) resetButton.addEventListener('click', () => {
           codeReader.reset()
-          document.getElementById('result').textContent = '';
+          const resultElement = document.getElementById('result');
+          if (resultElement) resultElement.textContent = '';
           console.log('Reset.')
         })
       })
