@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const resultDiv = document.getElementById('result');
+    
+    // Устанавливаем атрибут willReadFrequently для повышения производительности
+    canvas.setAttribute('willReadFrequently', 'true');
     const ctx = canvas.getContext('2d');
 
     let scanning = false;
