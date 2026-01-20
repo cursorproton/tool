@@ -6,6 +6,7 @@ const urlsToCache = [
   './manifest.json',
   './styles.css',
   './zxing.min.js',
+  './js/quagga.js',
   './qr.js',
   './script.js',
   './jquery.min.js',
@@ -161,6 +162,8 @@ self.addEventListener('fetch', function(event) {
               return caches.match('./script.js');
             } else if (requestUrl.includes('zxing.min.js')) {
               return caches.match('./zxing.min.js');
+            } else if (requestUrl.includes('quagga.js')) {
+              return caches.match('./js/quagga.js');
             } else if (requestUrl.includes('jquery')) {
               return caches.match('./jquery.min.js');
             }

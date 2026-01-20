@@ -4,11 +4,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('canvas');
     const resultDiv = document.getElementById('result');
     
+    // Выбираем библиотеку для сканирования (ZXing или Quagga)
+    let selectedLibrary = 'zxing'; // по умолчанию используем ZXing
+    
     // Инициализация ZXing
     let codeReader = null;
     let scanning = false;
     let stream = null;
     let zxingInitialized = false;
+    let quaggaInitialized = false;
     
     // Устанавливаем атрибут willReadFrequently для повышения производительности
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -58,6 +62,26 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             return false;
         }
+    }
+
+    // Инициализация Quagga
+    function initQuagga() {
+        if (typeof Quagga === 'undefined') {
+            console.error('Библиотека Quagga не загружена');
+            resultDiv.innerHTML = `
+                <div style="padding: 5px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; color: #721c24;">
+                    <strong>Ошибка загрузки библиотек сканирования</strong><br>
+                    Библиотека Quagga не найдена. Проверьте, правильно ли подключен файл js/quagga.js.<br><br>
+                    <button onclick="location.reload()" style="background-color: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                        Повторить попытку
+                    </button>
+                </div>
+            `;
+            return false;
+        }
+        
+        quaggaInitialized = true;
+        return true;
     }
 
     // Проверяем статус подключения к интернету
@@ -138,11 +162,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function startScanning() {
-        // Инициализируем ZXing если еще не инициализирован
-        if (!zxingInitialized && !initZXing()) {
-            return;
+        // Определяем, какую библиотеку использовать
+        if (selectedLibrary === 'quagga') {
+            // Инициализируем Quagga если еще не инициализирован
+            if (!quaggaInitialized && !initQuagga()) {
+                return;
+            }
+            startQuaggaScanning();
+        } else {
+            // Используем ZXing (по умолчанию)
+            if (!zxingInitialized && !initZXing()) {
+                return;
+            }
+            startZXingScanning();
         }
+    }
 
+    function startZXingScanning() {
         video.style.display = 'block';
         scanButton.textContent = 'Остановить сканирование';
         
@@ -193,9 +229,72 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
+    function startQuaggaScanning() {
+        video.style.display = 'block';
+        scanButton.textContent = 'Остановить сканирование';
+        
+        // Запрашиваем доступ к камере
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(mediaStream => {
+                stream = mediaStream;
+                
+                // Проверяем, не установлен ли уже srcObject
+                if (video.srcObject !== stream) {
+                    video.srcObject = stream;
+                    video.setAttribute("playsinline", true);
+                    
+                    // Добавляем обработчик события loadeddata для запуска воспроизведения
+                    video.onloadeddata = () => {
+                        video.play().catch(error => {
+                            console.error("Ошибка воспроизведения видео: ", error);
+                            resultDiv.innerHTML = `
+                                <div style="padding: 5px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; color: #721c24;">
+                                    <strong>Ошибка воспроизведения видео:</strong><br>
+                                    ${error.message}<br><br>
+                                    <button onclick="location.reload()" style="background-color: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                                        Повторить попытку
+                                    </button>
+                                </div>
+                            `;
+                        });
+                    };
+                }
+                
+                scanning = true;
+                
+                // Начинаем сканирование с помощью Quagga
+                scanWithQuagga();
+            })
+            .catch(err => {
+                console.error("Ошибка доступа к камере: ", err);
+                resultDiv.innerHTML = `
+                    <div style="padding: 5px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; color: #721c24;">
+                        <strong>Ошибка доступа к камере:</strong><br>
+                        ${err.message}<br><br>
+                        <button onclick="location.reload()" style="background-color: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                            Повторить попытку
+                        </button>
+                    </div>
+                `;
+                video.style.display = 'none';
+            });
+    }
+
     function stopScanning() {
         scanning = false;
         
+        // Останавливаем соответствующую библиотеку
+        if (selectedLibrary === 'quagga') {
+            stopQuaggaScanning();
+        } else {
+            stopZXingScanning();
+        }
+        
+        video.style.display = 'none';
+        scanButton.textContent = 'Сканировать';
+    }
+    
+    function stopZXingScanning() {
         // Останавливаем ZXing reader перед остановкой потока
         if (codeReader) {
             codeReader.reset();
@@ -205,9 +304,18 @@ document.addEventListener('DOMContentLoaded', () => {
             stream.getTracks().forEach(track => track.stop());
             stream = null;
         }
+    }
+    
+    function stopQuaggaScanning() {
+        // Останавливаем Quagga
+        if (typeof Quagga !== 'undefined') {
+            Quagga.stop();
+        }
         
-        video.style.display = 'none';
-        scanButton.textContent = 'Сканировать';
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
     }
     
     function scanWithZXing() {
@@ -254,6 +362,85 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Продолжаем сканирование если все еще активно
             // Убираем дополнительный таймаут, так как ZXing уже имеет встроенный
+        });
+    }
+    
+    function scanWithQuagga() {
+        if (!scanning) return;
+
+        // Конфигурация Quagga
+        const config = {
+            inputStream: {
+                name: "Live",
+                type: "LiveStream",
+                target: video, // элемент video
+                constraints: {
+                    facingMode: "environment"
+                }
+            },
+            decoder: {
+                readers: [
+                    "code_128_reader",
+                    "ean_reader",
+                    "ean_8_reader",
+                    "code_39_reader",
+                    "code_39_vin_reader",
+                    "codabar_reader",
+                    "upc_reader",
+                    "upc_e_reader",
+                    "i2of5_reader"
+                ]
+            },
+            locate: true,
+            frequency: 10 // частота обработки кадров
+        };
+
+        // Инициализация Quagga
+        Quagga.init(config, function(err) {
+            if (err) {
+                console.error('Ошибка инициализации Quagga:', err);
+                return;
+            }
+            
+            // После успешной инициализации запускаем детектирование
+            Quagga.start();
+            
+            // Обработчик события обнаружения кода
+            Quagga.onDetected(function(data) {
+                if (!scanning) {
+                    Quagga.stop();
+                    return;
+                }
+                
+                const codeData = data.codeResult.code;
+                const codeFormat = data.format || data.codeResult.format || 'UNKNOWN';
+
+                if (codeData && codeData.trim() !== '') {
+                    // Проверяем, не встречался ли уже такой код
+                    const existingResults = Array.from(resultDiv.children);
+                    const isDuplicate = existingResults.some(child => child.textContent.includes(codeData));
+
+                    if (!isDuplicate) {
+                        // Создаем элемент для нового кода
+                        const newResultElement = document.createElement('div');
+                        newResultElement.style.padding = '5px';
+                        newResultElement.style.backgroundColor = '#d4edda';
+                        newResultElement.style.border = '1px solid #c3e6cb';
+                        newResultElement.style.borderRadius = '5px';
+                        newResultElement.style.color = '#155724';
+                        newResultElement.style.marginBottom = '10px';
+                        newResultElement.innerHTML = `
+                            [${codeFormat}] ${codeData}
+                        `;
+                        
+                        // Добавляем новый результат
+                        resultDiv.appendChild(newResultElement);
+                        
+                        // Автоматически прокручиваем к последнему элементу
+                        newResultElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                    }
+                }
+            });
         });
     }
 });
