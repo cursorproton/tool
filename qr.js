@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(err => {
                 console.error("Ошибка доступа к камере: ", err);
                 resultDiv.innerHTML = `
-                    <div style="padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; color: #721c24;">
+                    <div style="padding: 5px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; color: #721c24;">
                         <strong>Ошибка доступа к камере:</strong><br>
                         ${err.message}<br><br>
                         <button onclick="location.reload()" style="background-color: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
@@ -219,12 +219,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${qrCount}. ${code.data}
                     `;
                     
-                    // Добавляем новый результат в начало (сверху) уже существующих
-                    if(resultDiv.firstChild) {
-                        resultDiv.insertBefore(newResultElement, resultDiv.firstChild);
-                    } else {
-                        resultDiv.appendChild(newResultElement);
-                    }
+                    // Добавляем новый результат в конец (вниз) уже существующих
+                    resultDiv.appendChild(newResultElement);
+                    
+                    // Автоматически прокручиваем к последнему элементу
+                    newResultElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
                 }
                 
                 // Продолжаем сканирование, не останавливая его
