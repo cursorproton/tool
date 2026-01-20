@@ -21,20 +21,26 @@ window.addEventListener('load', function () {
         // Обработчик кнопки старта сканирования
         const scanButton = document.getElementById('scanButton');
         if (scanButton) scanButton.addEventListener('click', () => {
-          codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
-            if (result) {
-              console.log(result)
-              const resultElement = document.getElementById('result');
-              if (resultElement) resultElement.textContent = result.text
-            }
-            
-            if (err && !(err instanceof ZXing.NotFoundException)) {
-              console.error(err)
-              const resultElement = document.getElementById('result');
-              if (resultElement) resultElement.textContent = err
-            }
-          })
-          console.log(`Started continuous decode from camera with id ${selectedDeviceId}`)
+          // Показываем видео элемент
+          const videoElement = document.getElementById('video');
+          if (videoElement) {
+            videoElement.style.display = 'block';
+            // Запускаем сканирование с обновленным элементом video
+            codeReader.decodeFromVideoDevice(selectedDeviceId, videoElement, (result, err) => {
+              if (result) {
+                console.log(result)
+                const resultElement = document.getElementById('result');
+                if (resultElement) resultElement.textContent = result.text
+              }
+              
+              if (err && !(err instanceof ZXing.NotFoundException)) {
+                console.error(err)
+                const resultElement = document.getElementById('result');
+                if (resultElement) resultElement.textContent = err
+              }
+            })
+            console.log(`Started continuous decode from camera with id ${selectedDeviceId}`)
+          }
         })
         
         // Обработчик кнопки сброса не требуется, так как кнопка отсутствует в HTML
