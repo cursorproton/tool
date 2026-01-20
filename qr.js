@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Проверяем, загрузились ли библиотеки
-    if (typeof Quagga === 'undefined' || typeof jsQR === 'undefined') {
+    if (typeof ZXing === 'undefined' || typeof jsQR === 'undefined') {
         console.error('Одна из библиотек сканирования не загружена');
         resultDiv.innerHTML = `
             <div style="padding: 5px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; color: #721c24;">
@@ -33,6 +33,29 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         return;
     }
+    
+    // Инициализируем ZXing reader для распознавания различных типов штрихкодов
+    const hints = new Map();
+    // Указываем, какие форматы штрихкодов мы хотим распознавать (кроме QR-кода, который будет обрабатываться jsQR)
+    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+        ZXing.BarcodeFormat.DATA_MATRIX,
+        ZXing.BarcodeFormat.AZTEC,
+        ZXing.BarcodeFormat.PDF_417,
+        ZXing.BarcodeFormat.UPC_E,
+        ZXing.BarcodeFormat.UPC_A,
+        ZXing.BarcodeFormat.EAN_8,
+        ZXing.BarcodeFormat.EAN_13,
+        ZXing.BarcodeFormat.CODE_128,
+        ZXing.BarcodeFormat.CODE_39,
+        ZXing.BarcodeFormat.ITF,
+        ZXing.BarcodeFormat.CODABAR
+    ]);
+    
+    // Добавляем дополнительные параметры для улучшения распознавания
+    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+    hints.set(ZXing.DecodeHintType.PURE_BARCODE, false);
+    
+    const barcodeReader = new ZXing.BrowserMultiFormatReader(hints);
 
     // Проверяем статус подключения к интернету
     window.addEventListener('offline', () => {
@@ -137,9 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 scanning = true;
                 
-                // Инициализируем Quagga
-                initQuagga();
-                
                 // Начинаем сканирование
                 requestAnimationFrame(scan);
             })
@@ -161,11 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function stopScanning() {
         scanning = false;
         
-        // Останавливаем Quagga, если она была инициализирована
-        if (Quagga) {
-            Quagga.stop();
-        }
-        
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
             stream = null;
@@ -174,41 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
         video.style.display = 'none';
         scanButton.textContent = 'Сканировать';
     }
-// Инициализируем Quagga для распознавания штрихкодов
-function initQuagga() {
-    Quagga.init({
-        inputStream: {
-            name: "Live",
-            type: "LiveStream",
-            target: document.querySelector('#video'),
-            constraints: {
-                width: 640,
-                height: 480,
-                facingMode: "environment"
-            }
-        },
-        decoder: {
-            readers: [
-                "code_128_reader",
-                "ean_reader",
-                "ean_8_reader",
-                "code_39_reader",
-                "code_39_vin_reader",
-                "codabar_reader",
-                "upc_reader",
-                "upc_e_reader",
-                "i2of5_reader"
-            ]
-        }
-    }, function(err) {
-        if (err) {
-            console.log(err);
-            return;
-        }
-        console.log("Quagga initialized successfully");
-    });
-}
-
 function scan() {
     if (!scanning) return;
     
@@ -266,49 +246,55 @@ function scan() {
             return;
         }
         
-        // Для штрихкодов будем использовать Quagga
-        // Устанавливаем обработчик события детектирования
-        Quagga.onDetected(onBarcodeDetected);
-        
-        // Запускаем распознавание
-        Quagga.start();
+        // Если QR-код не найден, пробуем декодировать другие типы штрихкодов с помощью ZXing
+        try {
+            const result = barcodeReader.decode(undefined, imageData);
+            
+            if (result && result.getText() && result.getText().trim() !== '') {
+                // Штрихкод найден и содержит данные
+                const codeData = result.getText().trim();
+                
+                // Проверяем, не встречался ли уже такой код
+                if (!foundCodes.has(codeData)) {
+                    foundCodes.add(codeData);
+                    
+                    // Увеличиваем счетчик найденных штрихкодов
+                    qrCount++;
+                    
+                    // Создаем элемент для нового штрихкода и добавляем его к существующим результатам
+                    const newResultElement = document.createElement('div');
+                    newResultElement.style.padding = '5px';
+                    newResultElement.style.backgroundColor = '#d4edda';
+                    newResultElement.style.border = '1px solid #c3e6cb';
+                    newResultElement.style.borderRadius = '5px';
+                    newResultElement.style.color = '#155724';
+                    newResultElement.style.marginBottom = '10px';
+                    newResultElement.innerHTML = `
+                        ${qrCount}. [${result.getBarcodeFormat()}] ${result.getText()}
+                    `;
+                    
+                    // Добавляем новый результат в конец (вниз) уже существующих
+                    resultDiv.appendChild(newResultElement);
+                    
+                    // Автоматически прокручиваем к последнему элементу
+                    newResultElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                }
+            }
+            
+            // Продолжаем сканирование, не останавливая его
+            // Добавляем небольшую задержку, чтобы избежать множественных чтений одного и того же штрихкода
+            setTimeout(() => {
+                requestAnimationFrame(scan);
+            }, 1000);
+            return;
+        } catch (error) {
+            // Ошибка декодирования, продолжаем сканирование
+            //console.log('Штрихкод не найден на этом кадре:', error.message);
+        }
     }
     
     // Продолжаем сканирование
     requestAnimationFrame(scan);
-}
-
-// Функция обработки обнаруженного штрихкода
-function onBarcodeDetected(data) {
-    if (data && data.codeResult && data.codeResult.code) {
-        const codeData = data.codeResult.code.trim();
-        
-        // Проверяем, не встречался ли уже такой код
-        if (!foundCodes.has(codeData)) {
-            foundCodes.add(codeData);
-            
-            // Увеличиваем счетчик найденных штрихкодов
-            qrCount++;
-            
-            // Создаем элемент для нового штрихкода и добавляем его к существующим результатам
-            const newResultElement = document.createElement('div');
-            newResultElement.style.padding = '5px';
-            newResultElement.style.backgroundColor = '#d4edda';
-            newResultElement.style.border = '1px solid #c3e6cb';
-            newResultElement.style.borderRadius = '5px';
-            newResultElement.style.color = '#155724';
-            newResultElement.style.marginBottom = '10px';
-            newResultElement.innerHTML = `
-                ${qrCount}. [${data.codeResult.format}] ${codeData}
-            `;
-            
-            // Добавляем новый результат в конец (вниз) уже существующих
-            resultDiv.appendChild(newResultElement);
-            
-            // Автоматически прокручиваем к последнему элементу
-            newResultElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-        }
-    }
 }
     // Проверяем статус подключения при загрузке страницы
     // Добавляем небольшую задержку, чтобы service worker успел активироваться
