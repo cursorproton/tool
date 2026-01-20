@@ -205,8 +205,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 inversionAttempts: "dontInvert",
             });
             
-            if (code) {
-                // QR-код найден
+            if (code && code.data && code.data.trim() !== '') {
+                // QR-код найден и содержит данные
                 // Проверяем, содержится ли уже такой текст в результате
                 const existingResults = resultDiv.querySelectorAll('div');
                 let alreadyExists = false;
@@ -261,8 +261,8 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const result = barcodeReader.decode(undefined, imageData);
                 
-                if (result) {
-                    // Штрихкод найден
+                if (result && result.getText() && result.getText().trim() !== '') {
+                    // Штрихкод найден и содержит данные
                     // Проверяем, содержится ли уже такой текст в результате
                     const existingResults = resultDiv.querySelectorAll('div');
                     let alreadyExists = false;
