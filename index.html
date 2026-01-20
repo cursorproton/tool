@@ -37,9 +37,16 @@
     <canvas id="canvas" width="300" height="200" style="display: none;"></canvas>
     <div id="result_user_Label">Кому: </div><div id="result_user"></div>
     <div id="result_Label">Инструмент: </div><div id="result"></div>
-    <button id="scanButton">Сканировать</button>
-</div>
-<script src="./zxing.min.js"></script>
+    <!-- Панель выбора камеры -->
+    <div id="sourceSelectPanel" style="display: none; margin: 10px 0;">
+      <label for="sourceSelect">Выберите камеру: </label>
+      <select id="sourceSelect"></select>
+    </div>
+    
+    <button id="startButton">Начать сканирование</button>
+    <button id="resetButton">Сбросить</button>
+  </div>
+<script type="text/javascript" src="zxing-library.min.js"></script>
 <script src="./js/quagga.js"></script>
 <script src="./qr.js"></script>
 </body>
