@@ -6,29 +6,17 @@ window.addEventListener('load', function () {
     
     codeReader.listVideoInputDevices()
       .then((videoInputDevices) => {
-        const sourceSelect = document.getElementById('sourceSelect')
-        selectedDeviceId = videoInputDevices[0].deviceId
+        // Получаем список камер и используем первую доступную
+        selectedDeviceId = videoInputDevices[0]?.deviceId;
         
-        // Добавляем выпадающий список с камерами если есть более одной камеры
-        if (videoInputDevices.length >= 1 && sourceSelect) {
-          videoInputDevices.forEach((element) => {
-            const sourceOption = document.createElement('option')
-            sourceOption.text = element.label
-            sourceOption.value = element.deviceId
-            sourceSelect.appendChild(sourceOption)
-          })
-          
-          sourceSelect.onchange = () => {
-            selectedDeviceId = sourceSelect.value;
-          };
-          
-          const sourceSelectPanel = document.getElementById('sourceSelectPanel')
-          if (sourceSelectPanel) sourceSelectPanel.style.display = 'block'
+        // Если есть хотя бы одна камера, используем первую
+        if (videoInputDevices.length >= 1) {
+          selectedDeviceId = videoInputDevices[0].deviceId;
         }
         
         // Обработчик кнопки старта сканирования
-        const startButton = document.getElementById('startButton');
-        if (startButton) startButton.addEventListener('click', () => {
+        const scanButton = document.getElementById('scanButton');
+        if (scanButton) scanButton.addEventListener('click', () => {
           codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
             if (result) {
               console.log(result)
@@ -45,14 +33,7 @@ window.addEventListener('load', function () {
           console.log(`Started continuous decode from camera with id ${selectedDeviceId}`)
         })
         
-        // Обработчик кнопки сброса
-        const resetButton = document.getElementById('resetButton');
-        if (resetButton) resetButton.addEventListener('click', () => {
-          codeReader.reset()
-          const resultElement = document.getElementById('result');
-          if (resultElement) resultElement.textContent = '';
-          console.log('Reset.')
-        })
+        // Обработчик кнопки сброса не требуется, так как кнопка отсутствует в HTML
       })
       .catch((err) => {
         console.error(err)
