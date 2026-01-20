@@ -82,13 +82,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function showOfflineNotification() {
+        // Проверяем, существует ли уже уведомление об автономном режиме
+        const existingNotification = document.getElementById('offline-notification');
+        if (existingNotification) {
+            // Если уведомление уже существует, не создаем новое
+            return;
+        }
+        
         // Показываем уведомление об автономном режиме
         const notification = document.createElement('div');
         notification.id = 'offline-notification';
         notification.innerHTML = `
             <div style="padding: 10px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; color: #856404; margin-top: 10px;">
                 <strong>Работа в автономном режиме</strong><br>
-                Приложение работает без подключения к интернету.
             </div>
         `;
         document.querySelector('.container').appendChild(notification);
@@ -236,9 +242,5 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Проверяем статус подключения при загрузке страницы
     // Добавляем небольшую задержку, чтобы service worker успел активироваться
-    setTimeout(() => {
-        if (!navigator.onLine) {
-            showOfflineNotification();
-        }
-    }, 1000);
+    // Удаляем дублирующий вызов, так как проверка уже происходит в другом месте
 });

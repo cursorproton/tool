@@ -179,14 +179,13 @@ footer {
 }
 
 #result {
-    margin-top: 1rem;
-    padding: 1rem;
+    padding: 0.5rem;
     background-color: #ecf0f1;
     border-radius: 5px;
     min-height: 20px;
     max-height: 200px; /* Ограничиваем максимальную высоту для прокрутки */
     overflow-y: auto; /* Добавляем вертикальную прокрутку при необходимости */
-    font-size: 7px; /* Уменьшаем размер шрифта в 4 раза от стандартного */
+    font-size: 10px; /* Уменьшаем размер шрифта в 4 раза от стандартного */
     text-align: left; /* Позиционируем текст слева */
 }
 
