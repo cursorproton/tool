@@ -19,9 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Проверяем, загрузились ли библиотеки
-    if (typeof ZXing === 'undefined' || typeof jsQR === 'undefined') {
-        console.error('Одна из библиотек сканирования не загружена');
+    // Проверяем, загрузилась ли библиотека jsQR
+    if (typeof jsQR === 'undefined') {
+        console.error('Библиотека jsQR не загружена');
         resultDiv.innerHTML = `
             <div style="padding: 5px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; color: #721c24;">
                 <strong>Ошибка загрузки библиотек сканирования</strong><br>
@@ -33,29 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         return;
     }
-    
-    // Инициализируем ZXing reader для распознавания различных типов штрихкодов
-    const hints = new Map();
-    // Указываем, какие форматы штрихкодов мы хотим распознавать (кроме QR-кода, который будет обрабатываться jsQR)
-    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-        ZXing.BarcodeFormat.DATA_MATRIX,
-        ZXing.BarcodeFormat.AZTEC,
-        ZXing.BarcodeFormat.PDF_417,
-        ZXing.BarcodeFormat.UPC_E,
-        ZXing.BarcodeFormat.UPC_A,
-        ZXing.BarcodeFormat.EAN_8,
-        ZXing.BarcodeFormat.EAN_13,
-        ZXing.BarcodeFormat.CODE_128,
-        ZXing.BarcodeFormat.CODE_39,
-        ZXing.BarcodeFormat.ITF,
-        ZXing.BarcodeFormat.CODABAR
-    ]);
-    
-    // Добавляем дополнительные параметры для улучшения распознавания
-    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-    hints.set(ZXing.DecodeHintType.PURE_BARCODE, false);
-    
-    const barcodeReader = new ZXing.BrowserMultiFormatReader(hints);
 
     // Проверяем статус подключения к интернету
     window.addEventListener('offline', () => {
@@ -143,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Начинаем сканирование
             startScanning();
         }
+        
     });
 
     function startScanning() {
@@ -203,56 +181,44 @@ function scan() {
         // Получаем данные изображения с canvas
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
-        // Сначала пробуем декодировать QR-код с помощью jsQR
+        // Пробуем декодировать все возможные типы кодов с помощью jsQR
+        // jsQR может обрабатывать QR-коды, Data Matrix, и некоторые другие форматы
         const code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: "dontInvert",
+            inversionAttempts: "attemptBoth",
+            // Увеличиваем области поиска для лучшего обнаружения
+            greyScaleWeights: {
+                red: 0.2126,
+                green: 0.7152,
+                blue: 0.0722
+            }
         });
         
-        if (code && code.data && code.data.trim() !== '') {
-            // QR-код найден и содержит данные
+        if (code) {
+            // Код найден
             const codeData = code.data.trim();
             
-            // Проверяем, не встречался ли уже такой код
-            if (!foundCodes.has(codeData)) {
-                foundCodes.add(codeData);
-                
-                // Увеличиваем счетчик найденных штрихкодов
-                qrCount++;
-                
-                // Создаем элемент для нового QR-кода и добавляем его к существующим результатам
-                const newResultElement = document.createElement('div');
-                newResultElement.style.padding = '5px';
-                newResultElement.style.backgroundColor = '#d4edda';
-                newResultElement.style.border = '1px solid #c3e6cb';
-                newResultElement.style.borderRadius = '5px';
-                newResultElement.style.color = '#155724';
-                newResultElement.style.marginBottom = '10px';
-                newResultElement.innerHTML = `
-                    ${qrCount}. [QR_CODE] ${code.data}
-                `;
-                
-                // Добавляем новый результат в конец (вниз) уже существующих
-                resultDiv.appendChild(newResultElement);
-                
-                // Автоматически прокручиваем к последнему элементу
-                newResultElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-            }
-            
-            // Продолжаем сканирование, не останавливая его
-            // Добавляем небольшую задержку, чтобы избежать множественных чтений одного и того же штрихкода
-            setTimeout(() => {
-                requestAnimationFrame(scan);
-            }, 1000);
-            return;
-        }
-        
-        // Если QR-код не найден, пробуем декодировать другие типы штрихкодов с помощью ZXing
-        try {
-            const result = barcodeReader.decode(undefined, imageData);
-            
-            if (result && result.getText() && result.getText().trim() !== '') {
-                // Штрихкод найден и содержит данные
-                const codeData = result.getText().trim();
+            if (codeData !== '') {
+                // Определяем тип кода на основе размеров и характеристик
+                let codeType = "CODE";
+                if (code.location && code.location.topLeftCorner && code.location.topRightCorner &&
+                    code.location.bottomRightCorner && code.location.bottomLeftCorner) {
+                    // Это, скорее всего, QR-код или Data Matrix
+                    const width = Math.max(
+                        Math.abs(code.location.topRightCorner.x - code.location.topLeftCorner.x),
+                        Math.abs(code.location.bottomRightCorner.x - code.location.bottomLeftCorner.x)
+                    );
+                    const height = Math.max(
+                        Math.abs(code.location.bottomLeftCorner.y - code.location.topLeftCorner.y),
+                        Math.abs(code.location.bottomRightCorner.y - code.location.topRightCorner.y)
+                    );
+                    
+                    // Если соотношение сторон примерно 1:1 и размер небольшой - это, скорее всего, QR-код
+                    if (Math.abs(width - height) / Math.max(width, height) < 0.3) {
+                        codeType = "QR_CODE";
+                    } else {
+                        codeType = "MATRIX_2D";
+                    }
+                }
                 
                 // Проверяем, не встречался ли уже такой код
                 if (!foundCodes.has(codeData)) {
@@ -261,7 +227,7 @@ function scan() {
                     // Увеличиваем счетчик найденных штрихкодов
                     qrCount++;
                     
-                    // Создаем элемент для нового штрихкода и добавляем его к существующим результатам
+                    // Создаем элемент для нового кода и добавляем его к существующим результатам
                     const newResultElement = document.createElement('div');
                     newResultElement.style.padding = '5px';
                     newResultElement.style.backgroundColor = '#d4edda';
@@ -270,7 +236,7 @@ function scan() {
                     newResultElement.style.color = '#155724';
                     newResultElement.style.marginBottom = '10px';
                     newResultElement.innerHTML = `
-                        ${qrCount}. [${result.getBarcodeFormat()}] ${result.getText()}
+                        ${qrCount}. [${codeType}] ${codeData}
                     `;
                     
                     // Добавляем новый результат в конец (вниз) уже существующих
@@ -280,16 +246,6 @@ function scan() {
                     newResultElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
                 }
             }
-            
-            // Продолжаем сканирование, не останавливая его
-            // Добавляем небольшую задержку, чтобы избежать множественных чтений одного и того же штрихкода
-            setTimeout(() => {
-                requestAnimationFrame(scan);
-            }, 1000);
-            return;
-        } catch (error) {
-            // Ошибка декодирования, продолжаем сканирование
-            //console.log('Штрихкод не найден на этом кадре:', error.message);
         }
     }
     
