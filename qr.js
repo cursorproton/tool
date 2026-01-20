@@ -49,9 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     ]);
     
     const codeReader = new ZXing.BrowserMultiFormatReader(hints);
-    
-    // Флаг для отслеживания состояния сканирования ZXing
-    let zxingScanning = false;
 
     // Проверяем статус подключения к интернету
     window.addEventListener('offline', () => {
@@ -189,12 +186,20 @@ document.addEventListener('DOMContentLoaded', () => {
     function scan() {
         if (!scanning) return;
         
-        if (video.readyState === video.HAVE_ENOUGH_DATA && !zxingScanning) {
-            zxingScanning = true;
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            // Устанавливаем размеры canvas равными размерам видео
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
             
-            // Пытаемся декодировать штрихкод с помощью ZXing прямо с видео
-            codeReader.decodeFromVideoDevice(null, video, (result, err) => {
-                zxingScanning = false;
+            // Рисуем текущий кадр видео на canvas
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Получаем данные изображения с canvas
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // Пытаемся декодировать штрихкод с помощью ZXing
+            try {
+                const result = codeReader.decode(undefined, imageData);
                 
                 if (result) {
                     // Штрихкод найден
@@ -211,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const existingText = textContent.substring(dotIndex + 2).trim(); // +2 для точки и пробела
                             if (existingText === result.getText()) {
                                 alreadyExists = true;
-                                return; // Прерываем обработку этого результата
+                                break;
                             }
                         }
                     }
@@ -246,11 +251,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     requestAnimationFrame(scan);
                 }, 1000);
-            });
-        } else {
-            // Если видео еще не готово или ZXing уже сканирует, продолжаем ожидать
-            requestAnimationFrame(scan);
+                return;
+            } catch (error) {
+                // Ошибка декодирования, продолжаем сканирование
+                //console.log('Штрихкод не найден на этом кадре:', error.message);
+            }
         }
+        
+        // Продолжаем сканирование
+        requestAnimationFrame(scan);
     }
     
     // Проверяем статус подключения при загрузке страницы
