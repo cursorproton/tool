@@ -48,6 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ZXing.BarcodeFormat.CODABAR
     ]);
     
+    // Добавляем дополнительные параметры для улучшения распознавания
+    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+    hints.set(ZXing.DecodeHintType.PURE_BARCODE, false);
+    
     const codeReader = new ZXing.BrowserMultiFormatReader(hints);
 
     // Проверяем статус подключения к интернету
