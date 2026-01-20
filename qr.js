@@ -212,12 +212,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 let alreadyExists = false;
                 
                 for (let i = 0; i < existingResults.length; i++) {
-                    // Извлекаем текст из существующего элемента (без номера)
+                    // Извлекаем текст из существующего элемента (без номера и типа)
                     // Разбиваем текст по первому точке и пробелу, чтобы получить текст после номера
                     const textContent = existingResults[i].textContent.trim();
                     const dotIndex = textContent.indexOf('.');
                     if (dotIndex !== -1) {
-                        const existingText = textContent.substring(dotIndex + 2).trim(); // +2 для точки и пробела
+                        // Получаем часть после номера и типа (например, " [QR_CODE] http://...")
+                        const afterNumber = textContent.substring(dotIndex + 1).trim();
+                        // Ищем первый пробел, чтобы отделить тип от содержимого
+                        const spaceIndex = afterNumber.indexOf(' ');
+                        let existingText = afterNumber;
+                        if (spaceIndex !== -1) {
+                            existingText = afterNumber.substring(spaceIndex + 1).trim();
+                        }
                         if (existingText === code.data) {
                             alreadyExists = true;
                             break;
@@ -268,12 +275,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     let alreadyExists = false;
                     
                     for (let i = 0; i < existingResults.length; i++) {
-                        // Извлекаем текст из существующего элемента (без номера)
+                        // Извлекаем текст из существующего элемента (без номера и типа)
                         // Разбиваем текст по первому точке и пробелу, чтобы получить текст после номера
                         const textContent = existingResults[i].textContent.trim();
                         const dotIndex = textContent.indexOf('.');
                         if (dotIndex !== -1) {
-                            const existingText = textContent.substring(dotIndex + 2).trim(); // +2 для точки и пробела
+                            // Получаем часть после номера и типа (например, " [QR_CODE] http://...")
+                            const afterNumber = textContent.substring(dotIndex + 1).trim();
+                            // Ищем первый пробел, чтобы отделить тип от содержимого
+                            const spaceIndex = afterNumber.indexOf(' ');
+                            let existingText = afterNumber;
+                            if (spaceIndex !== -1) {
+                                existingText = afterNumber.substring(spaceIndex + 1).trim();
+                            }
                             if (existingText === result.getText()) {
                                 alreadyExists = true;
                                 break;
