@@ -1,6 +1,10 @@
 // Используем предоставленный пример для инициализации сканирования
 window.addEventListener('load', function () {
     let selectedDeviceId;
+    if (!window.ZXing) {
+        console.error('ZXing library not loaded');
+        return;
+    }
     const codeReader = new ZXing.BrowserMultiFormatReader()
     console.log('ZXing code reader initialized')
     
