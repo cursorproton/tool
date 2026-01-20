@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     // Создаем элемент для нового QR-кода и добавляем его к существующим результатам
                     const newResultElement = document.createElement('div');
-                    newResultElement.style.padding = '15px';
+                    newResultElement.style.padding = '5px';
                     newResultElement.style.backgroundColor = '#d4edda';
                     newResultElement.style.border = '1px solid #c3e6cb';
                     newResultElement.style.borderRadius = '5px';
