@@ -150,9 +150,28 @@ document.addEventListener('DOMContentLoaded', () => {
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
             .then(mediaStream => {
                 stream = mediaStream;
-                video.srcObject = stream;
-                video.setAttribute("playsinline", true);
-                video.play();
+                
+                // Проверяем, не установлен ли уже srcObject
+                if (video.srcObject !== stream) {
+                    video.srcObject = stream;
+                    video.setAttribute("playsinline", true);
+                    
+                    // Добавляем обработчик события loadeddata для запуска воспроизведения
+                    video.onloadeddata = () => {
+                        video.play().catch(error => {
+                            console.error("Ошибка воспроизведения видео: ", error);
+                            resultDiv.innerHTML = `
+                                <div style="padding: 5px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; color: #721c24;">
+                                    <strong>Ошибка воспроизведения видео:</strong><br>
+                                    ${error.message}<br><br>
+                                    <button onclick="location.reload()" style="background-color: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                                        Повторить попытку
+                                    </button>
+                                </div>
+                            `;
+                        });
+                    };
+                }
                 
                 scanning = true;
                 
@@ -176,6 +195,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function stopScanning() {
         scanning = false;
+        
+        // Останавливаем ZXing reader перед остановкой потока
+        if (codeReader) {
+            codeReader.reset();
+        }
         
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
