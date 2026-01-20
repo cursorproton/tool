@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultDiv = document.getElementById('result');
     
     // Устанавливаем атрибут willReadFrequently для повышения производительности
-    canvas.setAttribute('willReadFrequently', 'true');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    
 
     let scanning = false;
     let stream = null;
