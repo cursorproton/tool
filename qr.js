@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof jsQR === 'undefined') {
         console.error('Библиотека jsQR не загружена');
         resultDiv.innerHTML = `
-            <div style="padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; color: #721c24;">
+            <div style="padding: 5px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; color: #721c24;">
                 <strong>Ошибка загрузки библиотеки сканирования</strong><br>
                 Приложение работает в автономном режиме. Функция сканирования QR-кодов недоступна без предварительного подключения к интернету.<br><br>
                 <button onclick="location.reload()" style="background-color: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
