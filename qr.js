@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let scanning = false;
     let stream = null;
     let qrCount = 0; // Переменная для отслеживания количества найденных QR-кодов
+    const foundCodes = new Set(); // Множество для отслеживания уже найденных кодов
 
     // Проверяем поддержку getUserMedia
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -207,33 +208,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (code && code.data && code.data.trim() !== '') {
                 // QR-код найден и содержит данные
-                // Проверяем, содержится ли уже такой текст в результате
-                const existingResults = resultDiv.querySelectorAll('div');
-                let alreadyExists = false;
+                const codeData = code.data.trim();
                 
-                for (let i = 0; i < existingResults.length; i++) {
-                    // Извлекаем текст из существующего элемента (без номера и типа)
-                    // Разбиваем текст по первому точке и пробелу, чтобы получить текст после номера
-                    const textContent = existingResults[i].textContent.trim();
-                    const dotIndex = textContent.indexOf('.');
-                    if (dotIndex !== -1) {
-                        // Получаем часть после номера и типа (например, " [QR_CODE] http://...")
-                        const afterNumber = textContent.substring(dotIndex + 1).trim();
-                        // Ищем первый пробел, чтобы отделить тип от содержимого
-                        const spaceIndex = afterNumber.indexOf(' ');
-                        let existingText = afterNumber;
-                        if (spaceIndex !== -1) {
-                            existingText = afterNumber.substring(spaceIndex + 1).trim();
-                        }
-                        if (existingText === code.data) {
-                            alreadyExists = true;
-                            break;
-                        }
-                    }
-                }
-                
-                // Если текст не существует, добавляем его
-                if (!alreadyExists) {
+                // Проверяем, не встречался ли уже такой код
+                if (!foundCodes.has(codeData)) {
+                    foundCodes.add(codeData);
                     // Увеличиваем счетчик найденных штрихкодов
                     qrCount++;
                     
@@ -270,33 +249,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (result && result.getText() && result.getText().trim() !== '') {
                     // Штрихкод найден и содержит данные
-                    // Проверяем, содержится ли уже такой текст в результате
-                    const existingResults = resultDiv.querySelectorAll('div');
-                    let alreadyExists = false;
+                    const codeData = result.getText().trim();
                     
-                    for (let i = 0; i < existingResults.length; i++) {
-                        // Извлекаем текст из существующего элемента (без номера и типа)
-                        // Разбиваем текст по первому точке и пробелу, чтобы получить текст после номера
-                        const textContent = existingResults[i].textContent.trim();
-                        const dotIndex = textContent.indexOf('.');
-                        if (dotIndex !== -1) {
-                            // Получаем часть после номера и типа (например, " [QR_CODE] http://...")
-                            const afterNumber = textContent.substring(dotIndex + 1).trim();
-                            // Ищем первый пробел, чтобы отделить тип от содержимого
-                            const spaceIndex = afterNumber.indexOf(' ');
-                            let existingText = afterNumber;
-                            if (spaceIndex !== -1) {
-                                existingText = afterNumber.substring(spaceIndex + 1).trim();
-                            }
-                            if (existingText === result.getText()) {
-                                alreadyExists = true;
-                                break;
-                            }
-                        }
-                    }
-                    
-                    // Если текст не существует, добавляем его
-                    if (!alreadyExists) {
+                    // Проверяем, не встречался ли уже такой код
+                    if (!foundCodes.has(codeData)) {
+                        foundCodes.add(codeData);
                         // Увеличиваем счетчик найденных штрихкодов
                         qrCount++;
                         
