@@ -1,11 +1,11 @@
-const CACHE_NAME = 'todo-pwa-v6'; // Обновляем версию кэша
+const CACHE_NAME = 'todo-pwa-v8'; // Обновляем версию кэша
 const urlsToCache = [
   './index.html',
   './qr.html',
   './offline.html',
   './manifest.json',
   './styles.css',
-  './jsQR.js',
+  './zxing.min.js',
   './qr.js',
   './script.js',
   './jquery.min.js',
@@ -159,8 +159,8 @@ self.addEventListener('fetch', function(event) {
               return caches.match('./qr.js');
             } else if (requestUrl.includes('script.js')) {
               return caches.match('./script.js');
-            } else if (requestUrl.includes('jsQR.js')) {
-              return caches.match('./jsQR.js');
+            } else if (requestUrl.includes('zxing.min.js')) {
+              return caches.match('./zxing.min.js');
             } else if (requestUrl.includes('jquery')) {
               return caches.match('./jquery.min.js');
             }
